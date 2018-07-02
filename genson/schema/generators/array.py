@@ -11,8 +11,8 @@ class BaseArray(SchemaGenerator):
     def match_object(obj):
         return isinstance(obj, list)
 
-    def to_schema(self):
-        schema = super(BaseArray, self).to_schema()
+    def to_schema(self, parentCardinality):
+        schema = super(BaseArray, self).to_schema(parentCardinality)
         schema['type'] = 'array'
         if self._items:
             schema['items'] = self.items_to_schema()
@@ -40,9 +40,10 @@ class List(BaseArray):
     def add_object(self, obj):
         for item in obj:
             self._items.add_object(item)
+        return super(List, self).add_object(obj)
 
     def items_to_schema(self):
-        return self._items.to_schema()
+        return self._items.to_schema(self.cardinality)
 
 
 class Tuple(BaseArray):
@@ -65,6 +66,7 @@ class Tuple(BaseArray):
 
     def add_object(self, obj):
         self._add(obj, 'add_object')
+        return super(Tuple, self).add_object(obj)
 
     def _add(self, items, func):
         while len(self._items) < len(items):
@@ -74,4 +76,4 @@ class Tuple(BaseArray):
             getattr(subschema, func)(item)
 
     def items_to_schema(self):
-        return [item.to_schema() for item in self._items]
+        return [item.to_schema(self.cardinality) for item in self._items]

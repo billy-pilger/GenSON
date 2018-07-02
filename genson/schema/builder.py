@@ -70,7 +70,7 @@ class SchemaBuilder(object):
         :rtype: ``dict``
         """
         schema = self._base_schema()
-        schema.update(self._root_node.to_schema())
+        schema.update(self._root_node.to_schema(0))
         return schema
 
     def to_json(self, *args, **kwargs):

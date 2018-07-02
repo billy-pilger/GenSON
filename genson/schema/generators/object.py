@@ -7,7 +7,7 @@ class Object(SchemaGenerator):
     """
     object schema generator
     """
-    KEYWORDS = ('type', 'properties', 'patternProperties', 'required')
+    KEYWORDS = ('type', 'properties', 'patternProperties', 'required', 'additionalProperties')
 
     @staticmethod
     def match_schema(schema):
@@ -22,6 +22,7 @@ class Object(SchemaGenerator):
         self._properties = defaultdict(lambda: cls())
         self._pattern_properties = defaultdict(lambda: cls())
         self._required = None
+        self._additionalProperties = None
 
     def add_schema(self, schema):
         self.add_extra_keywords(schema)
@@ -60,6 +61,8 @@ class Object(SchemaGenerator):
         else:
             self._required &= properties
 
+        return super(Object, self).add_object(obj)
+
     def _matching_pattern(self, prop):
         for pattern in self._pattern_properties.keys():
             if search(pattern, prop):
@@ -72,9 +75,10 @@ class Object(SchemaGenerator):
         for subschema, item in zip(self._items, items):
             getattr(subschema, func)(item)
 
-    def to_schema(self):
-        schema = super(Object, self).to_schema()
+    def to_schema(self, parentCardinality):
+        schema = super(Object, self).to_schema(parentCardinality)
         schema['type'] = 'object'
+        schema['additionalProperties'] = False
         if self._properties:
             schema['properties'] = self._properties_to_schema(
                 self._properties)
@@ -88,5 +92,5 @@ class Object(SchemaGenerator):
     def _properties_to_schema(self, properties):
         schema_properties = {}
         for prop, schema_node in properties.items():
-            schema_properties[prop] = schema_node.to_schema()
+            schema_properties[prop] = schema_node.to_schema(self.cardinality)
         return schema_properties

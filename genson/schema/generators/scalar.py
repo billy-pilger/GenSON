@@ -69,8 +69,10 @@ class Number(SchemaGenerator):
     def add_object(self, obj):
         if isinstance(obj, float):
             self._type = 'number'
+        
+        return super(Number, self).add_object(obj)
 
-    def to_schema(self):
-        schema = super(Number, self).to_schema()
+    def to_schema(self, parentCardinality):
+        schema = super(Number, self).to_schema(parentCardinality)
         schema['type'] = self._type
         return schema

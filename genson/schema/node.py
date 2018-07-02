@@ -52,14 +52,14 @@ class SchemaNode(object):
         # return self for easy method chaining
         return self
 
-    def to_schema(self):
+    def to_schema(self, parentCardinality):
         """
         Convert the current schema to a `dict`.
         """
         types = set()
         generated_schemas = []
         for schema_generator in self._schema_generators:
-            generated_schema = schema_generator.to_schema()
+            generated_schema = schema_generator.to_schema(parentCardinality)
             if len(generated_schema) == 1 and 'type' in generated_schema:
                 types.add(generated_schema['type'])
             else:

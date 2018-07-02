@@ -26,6 +26,7 @@ class SchemaGenerator(object):
 
     def __init__(self, node_class):
         self.node_class = node_class
+        self.cardinality = 0
         self._extra_keywords = {}
         self.init()
 
@@ -47,11 +48,14 @@ class SchemaGenerator(object):
                           keyword, self._extra_keywords[keyword], value))
 
     def add_object(self, obj):
-        pass
+        self.cardinality = self.cardinality + 1
 
-    def to_schema(self):
-        return copy(self._extra_keywords)
-
+    def to_schema(self, parentCardinality):
+        x = copy(self._extra_keywords)
+        if parentCardinality > 0:
+            x['rate'] = round(self.cardinality / float(parentCardinality), 3)
+        
+        return x
 
 class TypedSchemaGenerator(SchemaGenerator):
     """
@@ -70,7 +74,7 @@ class TypedSchemaGenerator(SchemaGenerator):
     def match_object(cls, obj):
         return isinstance(obj, cls.PYTHON_TYPE)
 
-    def to_schema(self):
-        schema = super(TypedSchemaGenerator, self).to_schema()
+    def to_schema(self, parentCardinality):
+        schema = super(TypedSchemaGenerator, self).to_schema(parentCardinality)
         schema['type'] = self.JS_TYPE
         return schema
